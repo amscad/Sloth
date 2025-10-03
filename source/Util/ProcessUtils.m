@@ -66,17 +66,18 @@
     return ([ProcessUtils UIDForPID:pid] == getuid());
 }
 
+#define SYSCTL_PATH_LEN 4
+
 + (uid_t)UIDForPID:(pid_t)pid {
     uid_t uid = -1;
     
     struct kinfo_proc process;
     size_t proc_buf_size = sizeof(process);
     
-    // Compose search path for sysctl. Here you can specify PID directly.
-    const u_int path_len = 4;
-    int path[path_len] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, pid};
+    // Compose search path for sysctl.
+    int path[SYSCTL_PATH_LEN] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, pid};
     
-    int sysctl_result = sysctl(path, path_len, &process, &proc_buf_size, NULL, 0);
+    int sysctl_result = sysctl(path, SYSCTL_PATH_LEN, &process, &proc_buf_size, NULL, 0);
     
     // If sysctl did not fail and process with PID available - take UID.
     if ((sysctl_result == 0) && (proc_buf_size != 0)) {
